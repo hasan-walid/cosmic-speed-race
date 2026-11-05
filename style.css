@@ -107,7 +107,7 @@ h1,h2,h3{line-height:1.08;letter-spacing:-.035em}
 .step-progress{margin-right:auto;color:var(--muted);font-size:13px;font-weight:800}
 .step-actions .button-secondary+.step-progress{margin-left:auto}
 .racer-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.racer-card{padding:19px;min-height:217px;display:flex;flex-direction:column;gap:7px}
+.racer-card{padding:19px;min-height:185px;display:flex;flex-direction:column;gap:7px}
 .racer-emoji{display:grid;place-items:center;width:48px;height:48px;border-radius:13px;background:#31436c;font-size:27px}
 .racer-card h3{font-size:20px;margin:5px 0 0}
 .racer-speed{font-size:27px;font-weight:900;color:var(--yellow);line-height:1.05}
@@ -118,7 +118,6 @@ h1,h2,h3{line-height:1.08;letter-spacing:-.035em}
 .racer-card.jet .racer-speed{color:var(--blue)}
 .comparison-note,.small-note{color:var(--muted);font-size:13px;line-height:1.45}
 .comparison-note{margin:14px 2px 19px;max-width:950px}
-.comparison-label{font-size:19px;font-weight:850;margin:23px 0 12px}
 .light-stage{position:relative;padding:29px 32px 33px;background:radial-gradient(circle at 50% 0,#385b87,#172b50 70%);border:2px solid #9ec0db;overflow:hidden;text-align:center;box-shadow:0 0 40px #78e1d628}
 .light-visual{display:flex;align-items:center;justify-content:center;gap:13px;width:min(640px,100%);margin:0 auto 18px;color:var(--yellow);font-size:35px;text-shadow:0 0 19px #ffd66da3}
 .light-visual i{display:block;flex:1;height:4px;border-radius:4px;background:linear-gradient(90deg,transparent,var(--yellow),var(--mint),transparent);box-shadow:0 0 20px var(--yellow);animation:light-pulse 1.7s ease-in-out infinite alternate}
@@ -133,8 +132,25 @@ h1,h2,h3{line-height:1.08;letter-spacing:-.035em}
 .light-speed-number{color:var(--yellow);font-size:clamp(40px,6vw,74px);font-weight:950;letter-spacing:-.06em;line-height:1.05;overflow-wrap:anywhere;margin:12px 0}
 .light-speed-number span{font-size:.37em;letter-spacing:0}
 .light-unit{font-size:clamp(22px,3vw,34px);font-weight:900;margin:4px 0 10px}
+.light-analogy{font-size:17px;color:var(--ink);margin:0 0 8px}
 .guess-feedback{display:block;min-height:1.5em;color:var(--yellow);font-size:17px;font-weight:850;margin:6px 0}
 .light-unlocked p:last-child{color:var(--mint);font-size:18px;font-weight:800;margin:0}
+.one-second{padding:22px 25px;margin-top:17px}
+.one-second .card-heading h3{font-size:clamp(23px,3vw,31px)}
+.chart-note{font-size:14px;color:var(--muted);margin:12px 0 15px}
+.chart-note strong{color:var(--mint)}
+.one-second-rows{display:grid;gap:7px}
+.one-second-row{display:grid;grid-template-columns:minmax(150px,215px) minmax(0,1fr) minmax(120px,155px);align-items:center;gap:12px;min-height:43px;border-bottom:1px solid #385073}
+.one-second-row:last-child{border-bottom:0}
+.one-second-name{font-size:15px;min-width:0}
+.one-second-value{grid-column:3;text-align:right;color:var(--yellow);font-size:16px;font-weight:900}
+.one-second-bar{grid-column:2;grid-row:1;height:13px;border-radius:8px;background:#09142d;box-shadow:inset 0 0 0 1px #62799c;overflow:hidden}
+.one-second-fill{display:block;height:100%;min-width:3px;border-radius:8px;background:var(--mint)}
+.one-second-fill.mbappe{background:var(--pink)}
+.one-second-fill.cheetah{background:#ffbd86}
+.one-second-fill.jet{background:var(--blue)}
+.one-second-fill.light{background:var(--yellow);box-shadow:0 0 12px #ffd66db0}
+.one-second-row.is-locked .one-second-value{color:var(--muted)}
 .mini-race{padding:0;margin-top:17px}
 .mini-race summary{cursor:pointer;padding:17px 22px;font-weight:850;color:var(--mint)}
 .mini-race .table-scroll,.mini-race .small-note{margin-left:22px;margin-right:22px}
@@ -166,21 +182,27 @@ tr:last-child td{border-bottom:0}
 .planet-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 23px;margin-bottom:16px;background:#1c3157}
 .planet-summary h3{font-size:35px;margin:2px 0 0}
 .planet-summary strong{display:block;font-size:clamp(19px,2.5vw,29px);color:var(--yellow)}
-.race-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.race-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(310px,.85fr);gap:16px}
 .race-visual,.planet-results{padding:22px}
 .race-visual .small-note{margin:7px 0 15px}
 .race-arrow{font-size:23px}
-.race-track{position:relative;height:155px;border:1px solid #455f89;border-radius:13px;background:linear-gradient(90deg,#0c1b3b,#1b3157);overflow:hidden}
-.track-sun{position:absolute;left:14px;top:43px;font-size:46px;color:var(--yellow);z-index:2}
-.track-line{position:absolute;left:70px;right:50px;top:79px;border-top:3px dashed #728cb6}
-.track-marker{position:absolute;left:70px;line-height:1;z-index:3;transition:none}
-.track-marker-people{top:53px;color:var(--pink);font-size:17px}
-.track-marker-light{top:77px;color:var(--yellow);font-size:25px;text-shadow:0 0 12px var(--yellow)}
-.track-finish{position:absolute;right:10px;bottom:15px;font-size:12px;font-weight:900;color:var(--mint)}
-.race-track.is-running .track-marker-light{animation:light-dash 1s ease-out forwards}
-.race-track.is-finished .track-marker-light{left:calc(100% - 58px)}
-@keyframes light-dash{to{left:calc(100% - 58px)}}
+.race-track{padding:14px 16px;border:1px solid #455f89;border-radius:13px;background:linear-gradient(90deg,#0c1b3b,#1b3157)}
+.track-endpoints{display:grid;grid-template-columns:minmax(125px,170px) minmax(60px,1fr) minmax(155px,180px);gap:10px;color:var(--mint);font-size:13px;font-weight:900;margin-bottom:14px}
+.track-endpoints span:first-child{grid-column:2;grid-row:1;justify-self:start;color:var(--yellow)}
+.track-endpoints span:last-child{grid-column:2;grid-row:1;justify-self:end}
+.race-progress{display:grid;gap:10px}
+.race-progress-row{display:grid;grid-template-columns:minmax(125px,170px) minmax(60px,1fr) minmax(155px,180px);align-items:center;gap:10px}
+.race-progress-name{font-size:13px;font-weight:800;line-height:1.2}
+.race-progress-value{text-align:right;color:#fff;font-size:12px;font-variant-numeric:tabular-nums}
+.race-lane{position:relative;height:18px;border-radius:10px;background:linear-gradient(#4e6790,#4e6790) center/100% 2px no-repeat}
+.race-dot{position:absolute;top:50%;left:0;width:11px;height:11px;border-radius:50%;background:var(--mint);transform:translate(-50%,-50%);box-shadow:0 0 0 2px #101e3d}
+.race-dot.mbappe{background:var(--pink)}
+.race-dot.cheetah{background:#ffbd86}
+.race-dot.jet{background:var(--blue)}
+.race-dot.light{background:var(--yellow);box-shadow:0 0 10px var(--yellow)}
 .animation-note{margin:9px 0 0;color:var(--muted);font-size:12px}
+.race-clock{margin-top:13px;font-size:17px;font-weight:850}
+.race-clock output{color:var(--yellow);font-size:22px;font-variant-numeric:tabular-nums}
 .race-status{font-size:13px;font-weight:750;color:var(--muted)}
 .planet-results h3{font-size:25px;margin:5px 0 15px}
 .planet-guesses{grid-template-columns:1fr;gap:8px}
@@ -203,6 +225,23 @@ tr:last-child td{border-bottom:0}
 .notes-content ul{margin:0;padding-left:20px}
 .notes-content li{margin:5px 0}
 .footer{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:20px 0 42px;color:var(--muted);font-size:12px}
+body.is-presenting .container,body.is-presenting .topbar-inner{width:min(1500px,calc(100% - 56px))}
+body.is-presenting .intro{padding:22px 0 20px}
+body.is-presenting .section-heading h2{font-size:clamp(44px,4vw,65px)}
+body.is-presenting .step-tab{min-height:66px;font-size:17px}
+body.is-presenting .card-kicker,body.is-presenting .eyebrow{font-size:14px}
+body.is-presenting .speed-number strong{font-size:clamp(84px,7vw,120px)}
+body.is-presenting .racer-card h3{font-size:24px}
+body.is-presenting .racer-speed{font-size:36px}
+body.is-presenting .racer-ratio,body.is-presenting .one-second-name,body.is-presenting .one-second-value{font-size:19px}
+body.is-presenting .light-locked h3{font-size:clamp(38px,4vw,60px)}
+body.is-presenting .light-speed-number{font-size:clamp(60px,6vw,100px)}
+body.is-presenting .one-second .card-heading h3,body.is-presenting .planet-results h3{font-size:36px}
+body.is-presenting .guess-option{font-size:20px;min-height:75px}
+body.is-presenting .race-progress-name,body.is-presenting .race-progress-value{font-size:16px}
+body.is-presenting .race-clock{font-size:23px}
+body.is-presenting .race-clock output{font-size:31px}
+body.is-presenting .light-time-callout{font-size:22px}
 @media(max-width:950px){
   .racer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .planet-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -228,14 +267,29 @@ tr:last-child td{border-bottom:0}
   .racer-card{min-height:190px;padding:15px}
   .racer-card h3{font-size:17px}
   .racer-speed{font-size:24px}
+  .one-second{padding:18px}
+  .one-second-row{grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;padding:8px 0}
+  .one-second-value{grid-column:2;grid-row:1}
+  .one-second-bar{grid-column:1/-1;grid-row:2}
   .light-stage,.mini-race{padding:19px}
   .mini-race{padding:0}
   .guess-options:not(.planet-guesses){grid-template-columns:1fr}
   .guess-option{min-height:51px;font-size:15px}
   .planet-summary{align-items:flex-start;flex-direction:column}
+  .race-progress-row{grid-template-columns:minmax(0,1fr) auto;gap:3px 8px}
+  .track-endpoints{display:flex;justify-content:space-between}
+  .race-lane{grid-column:1/-1;grid-row:2}
+  .race-progress-value{grid-column:2;grid-row:1}
   .step-actions{flex-wrap:wrap}
   .step-actions .button{font-size:13px}
   .footer{flex-direction:column}
+  body.is-presenting .container,body.is-presenting .topbar-inner{width:calc(100% - 28px)}
+  body.is-presenting .step-tab{font-size:11px;min-height:62px}
+  body.is-presenting .guess-option{font-size:17px;min-height:55px}
+  body.is-presenting .racer-card h3{font-size:18px}
+  body.is-presenting .one-second-name,body.is-presenting .one-second-value{font-size:15px}
+  body.is-presenting .light-speed-number{font-size:40px}
+  body.is-presenting .one-second .card-heading h3,body.is-presenting .planet-results h3{font-size:25px}
 }
 @media(max-width:420px){
   .racer-grid{grid-template-columns:1fr}

@@ -3,6 +3,7 @@
 const LIGHT_MPS = 299792458;
 const AU_METRES = 149597870700;
 const YEAR_SECONDS = 365.25 * 24 * 60 * 60;
+const RACE_ANIMATION_MS = 5000;
 const RACERS = [
   {id:"you",label:"You",speedMps:null,speedType:"Measured average",description:"Average speed over your run",icon:"🏃"},
   {id:"mbappe",label:"Kylian Mbappé",speedMps:10.89,speedType:"Illustrative peak",description:"Approximate reported sprint peak",icon:"⚽"},
@@ -32,7 +33,10 @@ const state = {
   lightGuess:null,
   planetLightRevealed:false,
   planetGuess:null,
-  raceTimer:null
+  presentationFallback:false,
+  raceFrame:null,
+  raceRunning:false,
+  raceRows:{}
 };
 const $ = id => document.getElementById(id);
 
@@ -53,6 +57,33 @@ function calculateSpeed(distanceM,timeS){
 function calculateTravelTime(distanceM,speedMps){
   if(!Number.isFinite(distanceM)||!Number.isFinite(speedMps)||distanceM<0||speedMps<=0)return NaN;
   return distanceM/speedMps;
+}
+function getRaceProgress(distanceM,speedMps,elapsedSeconds){
+  if(!Number.isFinite(distanceM)||distanceM<=0||!Number.isFinite(speedMps)||speedMps<=0||!Number.isFinite(elapsedSeconds))return {distanceM:NaN,fraction:NaN};
+  const travelled=Math.min(distanceM,Math.max(0,elapsedSeconds)*speedMps);
+  return {distanceM:travelled,fraction:travelled/distanceM};
+}
+function getLogBarPercent(distanceM,minDistanceM,maxDistanceM){
+  if(!Number.isFinite(distanceM)||!Number.isFinite(minDistanceM)||!Number.isFinite(maxDistanceM)||distanceM<=0||minDistanceM<=0||maxDistanceM<minDistanceM)return NaN;
+  if(maxDistanceM===minDistanceM)return 100;
+  return Math.max(3,Math.min(100,100*(Math.log10(distanceM)-Math.log10(minDistanceM))/(Math.log10(maxDistanceM)-Math.log10(minDistanceM))));
+}
+function formatOneSecondDistance(metres){
+  if(metres<1)return formatNumber(metres*100,2)+" cm";
+  if(metres<1000)return formatNumber(metres,2)+" m";
+  return formatNumber(metres/1000,1)+" km";
+}
+function formatRaceDistance(metres){
+  if(metres<1000)return formatNumber(metres,1)+" m";
+  if(metres<1000000)return formatNumber(metres/1000,2)+" km";
+  return formatNumber(metres/1000000000,2)+" million km";
+}
+function formatProgressPercent(fraction){
+  const percent=fraction*100;
+  if(percent>0&&percent<0.00000001)return "<0.00000001%";
+  if(percent===0)return "0%";
+  const decimals=percent<1?Math.min(10,Math.max(2,Math.ceil(-Math.log10(percent))+1)):1;
+  return formatNumber(percent,decimals)+"%";
 }
 function getPlanetDistanceMetres(planet){return planet.distanceAU*AU_METRES}
 function plural(value,word){return value===1?word:word+"s"}
@@ -175,7 +206,34 @@ function renderComparisons(){
   });
   $("light-ratio").textContent="About "+formatFactor(LIGHT_MPS/state.speedMps)+" your average speed.";
   renderLightState();
+  renderOneSecondComparison();
   renderHundredMetres();
+}
+function renderOneSecondComparison(){
+  if(state.speedMps===null)return;
+  const racers=getRacers().filter(racer=>state.lightRevealed||racer.id!=="light");
+  const minDistance=Math.min(...racers.map(racer=>racer.speedMps));
+  const maxDistance=Math.max(...racers.map(racer=>racer.speedMps));
+  const rows=$("one-second-rows");
+  rows.replaceChildren();
+  racers.forEach(racer=>{
+    const row=makeElement("div","one-second-row");
+    row.append(makeElement("strong","one-second-name",racer.icon+" "+racer.label));
+    row.append(makeElement("span","one-second-value",formatOneSecondDistance(racer.speedMps)));
+    const bar=makeElement("div","one-second-bar");
+    const fill=makeElement("span","one-second-fill "+racer.id);
+    fill.style.width=getLogBarPercent(racer.speedMps,minDistance,maxDistance)+"%";
+    bar.append(fill);
+    row.append(bar);
+    rows.append(row);
+  });
+  if(!state.lightRevealed){
+    const row=makeElement("div","one-second-row is-locked");
+    row.append(makeElement("strong","one-second-name","✦ Light"));
+    row.append(makeElement("span","one-second-value","Guess first"));
+    row.append(makeElement("div","one-second-bar"));
+    rows.append(row);
+  }
 }
 function renderLightState(){
   $("light-locked").hidden=state.lightRevealed;
@@ -208,6 +266,7 @@ function revealLight(){
   if(state.speedMps===null&&!calculateFromForm())return;
   state.lightRevealed=true;
   renderLightState();
+  renderOneSecondComparison();
   renderHundredMetres();
 }
 
@@ -287,35 +346,83 @@ function renderPlanetRace(){
     row.append(makeElement("small","",formatFactor(LIGHT_MPS/racer.speedMps)+" longer than light"));
     results.append(row);
   });
+  renderRaceRows();
+  updateRaceProgress(0);
+}
+function renderRaceRows(){
+  const rows=$("race-progress");
+  rows.replaceChildren();
+  state.raceRows={};
+  getRacers().forEach(racer=>{
+    const row=makeElement("div","race-progress-row");
+    row.append(makeElement("span","race-progress-name",racer.icon+" "+racer.label));
+    const lane=makeElement("div","race-lane");
+    lane.setAttribute("aria-hidden","true");
+    const marker=makeElement("span","race-dot "+racer.id);
+    lane.append(marker);
+    row.append(lane);
+    const number=makeElement("span","race-progress-value","0 m · 0%");
+    row.append(number);
+    rows.append(row);
+    state.raceRows[racer.id]={marker,number};
+  });
+}
+function updateRaceProgress(elapsedSeconds){
+  if(state.speedMps===null)return;
+  const distanceM=getPlanetDistanceMetres(PLANETS[state.planetIndex]);
+  const lightSeconds=calculateTravelTime(distanceM,LIGHT_MPS);
+  const elapsed=Math.max(0,Math.min(lightSeconds,elapsedSeconds));
+  $("sim-time").textContent=formatTravelDuration(elapsed);
+  getRacers().forEach(racer=>{
+    const progress=getRaceProgress(distanceM,racer.speedMps,elapsed);
+    const row=state.raceRows[racer.id];
+    if(!row)return;
+    row.marker.style.left=progress.fraction*100+"%";
+    row.number.textContent=formatRaceDistance(progress.distanceM)+" · "+formatProgressPercent(progress.fraction);
+  });
 }
 function resetRaceAnimation(){
-  if(state.raceTimer!==null)clearTimeout(state.raceTimer);
-  state.raceTimer=null;
-  $("race-track").classList.remove("is-running","is-finished");
+  if(state.raceFrame!==null)cancelAnimationFrame(state.raceFrame);
+  state.raceFrame=null;
+  state.raceRunning=false;
+  $("skip-race").hidden=true;
+  $("start-race").hidden=!state.planetLightRevealed;
+  updateRaceProgress(0);
   $("race-status").textContent="Ready at the Sun.";
+}
+function finishRace(){
+  if(state.raceFrame!==null)cancelAnimationFrame(state.raceFrame);
+  state.raceFrame=null;
+  state.raceRunning=false;
+  const distanceM=getPlanetDistanceMetres(PLANETS[state.planetIndex]);
+  updateRaceProgress(calculateTravelTime(distanceM,LIGHT_MPS));
+  $("skip-race").hidden=true;
+  $("start-race").hidden=false;
+  $("race-status").textContent="Light arrived. Look how little the others travelled!";
 }
 function startRace(){
   if(state.speedMps===null&&!calculateFromForm())return;
   revealPlanetLight();
   resetRaceAnimation();
-  const track=$("race-track");
   if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-    track.classList.add("is-finished");
-    $("race-status").textContent="Light wins! Compare the times.";
+    finishRace();
     return;
   }
-  void track.offsetWidth;
-  track.classList.add("is-running");
-  $("race-status").textContent="Watch light cross the Solar System…";
-  state.raceTimer=setTimeout(()=>{
-    $("race-status").textContent="Light has already arrived!";
-    state.raceTimer=setTimeout(()=>{
-      track.classList.remove("is-running");
-      track.classList.add("is-finished");
-      $("race-status").textContent="Light wins! The others have barely started.";
-      state.raceTimer=null;
-    },4900);
-  },1100);
+  state.raceRunning=true;
+  $("skip-race").hidden=false;
+  $("start-race").hidden=true;
+  $("race-status").textContent="Racing from the Sun…";
+  const lightSeconds=calculateTravelTime(getPlanetDistanceMetres(PLANETS[state.planetIndex]),LIGHT_MPS);
+  let startTime=null;
+  const tick=now=>{
+    if(!state.raceRunning)return;
+    if(startTime===null)startTime=now;
+    const fraction=Math.min(1,(now-startTime)/RACE_ANIMATION_MS);
+    updateRaceProgress(lightSeconds*fraction);
+    if(fraction<1)state.raceFrame=requestAnimationFrame(tick);
+    else finishRace();
+  };
+  state.raceFrame=requestAnimationFrame(tick);
 }
 
 function showStep(index){
@@ -324,7 +431,7 @@ function showStep(index){
     index=0;
   }
   state.step=index;
-  if(index!==2&&state.raceTimer!==null)resetRaceAnimation();
+  if(index!==2&&state.raceRunning)resetRaceAnimation();
   ["step-run","step-compare","step-planets"].forEach((id,i)=>$(id).hidden=i!==index);
   document.querySelectorAll(".step-tab").forEach((button,i)=>{
     const active=i===index;
@@ -336,40 +443,59 @@ function showStep(index){
   if(index===2)renderPlanetRace();
   window.scrollTo({top:$("main").offsetTop,behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
 }
-function resetAll(){
-  resetRaceAnimation();
+function clearRunner(){
   $("run-form").reset();
   state.distanceM=20;
   state.timeS=5;
   state.name="";
   state.speedMps=null;
   $("runner-label").textContent="Your average speed";
+  clearError();
+  $("run-placeholder").hidden=false;
+  $("run-result").hidden=true;
+  $("racer-grid").replaceChildren();
+  $("one-second-rows").replaceChildren();
+  $("hundred-table").replaceChildren();
+  $("travel-results").replaceChildren();
+  $("race-progress").replaceChildren();
+  state.raceRows={};
+}
+function resetRunner(){
+  resetRaceAnimation();
+  clearRunner();
+  showStep(0);
+  $("distance-input").focus();
+}
+function resetAll(){
+  resetRaceAnimation();
+  clearRunner();
   state.planetIndex=2;
   state.lightRevealed=false;
   state.lightGuess=null;
   state.planetLightRevealed=false;
   state.planetGuess=null;
-  clearError();
-  $("run-placeholder").hidden=false;
-  $("run-result").hidden=true;
-  $("hundred-table").replaceChildren();
-  $("travel-results").replaceChildren();
   renderLightState();
   renderPlanetGrid();
+  $("start-race").hidden=true;
+  $("light-time-callout").hidden=true;
+  $("planet-other-results").hidden=true;
   showStep(0);
   $("distance-input").focus();
 }
 async function togglePresentation(){
   try{
     if(document.fullscreenElement)await document.exitFullscreen();
+    else if(state.presentationFallback)state.presentationFallback=false;
     else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();
-    else $("present-button").title="Use your browser's full screen command.";
+    else state.presentationFallback=true;
   }catch{
-    $("present-button").title="Use your browser's full screen command.";
+    state.presentationFallback=true;
   }
+  updatePresentButton();
 }
 function updatePresentButton(){
-  const active=!!document.fullscreenElement;
+  const active=!!document.fullscreenElement||state.presentationFallback;
+  document.body.classList.toggle("is-presenting",active);
   $("present-button").setAttribute("aria-label",active?"Exit full screen presentation mode":"Enter full screen presentation mode");
   $("present-button").querySelector("span").textContent=active?"Exit":"Present";
 }
@@ -380,13 +506,14 @@ function init(){
   $("run-form").addEventListener("submit",event=>{event.preventDefault();calculateFromForm()});
   ["distance-input","time-input"].forEach(id=>$(id).addEventListener("input",invalidateRun));
   $("name-input").addEventListener("input",()=>{if(state.speedMps!==null){state.name=$("name-input").value.trim().replace(/\s+/g," ").slice(0,32);renderRunResult();renderComparisons();renderPlanetRace()}});
-  $("reset-run").addEventListener("click",resetAll);
+  $("reset-run").addEventListener("click",resetRunner);
   $("start-over").addEventListener("click",resetAll);
   $("reveal-light").addEventListener("click",revealLight);
   $("reveal-planet-light").addEventListener("click",startRace);
   $("start-race").addEventListener("click",startRace);
+  $("skip-race").addEventListener("click",()=>{if(state.raceRunning)finishRace()});
   $("present-button").addEventListener("click",togglePresentation);
   document.addEventListener("fullscreenchange",updatePresentButton);
 }
 if(typeof document!=="undefined")document.addEventListener("DOMContentLoaded",init);
-if(typeof module!=="undefined")module.exports={LIGHT_MPS,AU_METRES,RACERS,PLANETS,calculateSpeed,calculateTravelTime,getPlanetDistanceMetres,formatSpeed,formatTravelDuration,formatFactor};
+if(typeof module!=="undefined")module.exports={LIGHT_MPS,AU_METRES,RACERS,PLANETS,state,calculateSpeed,calculateTravelTime,getPlanetDistanceMetres,getRaceProgress,getLogBarPercent,formatSpeed,formatTravelDuration,formatFactor,resetRunner,resetAll,startRace,selectPlanet,calculateFromForm,renderComparisons,renderPlanetRace,togglePresentation,init};

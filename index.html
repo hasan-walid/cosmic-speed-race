@@ -74,6 +74,13 @@
       <div class="planet-grid" id="planet-grid" role="group" aria-label="Choose a destination planet"></div>
       <div class="planet-summary card"><div><span class="card-kicker">DESTINATION</span><h3 id="planet-name">Earth</h3></div><div><span class="card-kicker">AVERAGE DISTANCE FROM THE SUN</span><strong id="planet-distance">149.6 million km</strong></div></div>
       <div class="race-layout">
+        <section class="card planet-guess" aria-labelledby="planet-guess-title">
+          <p class="eyebrow">YOUR GUESS</p>
+          <h3 id="planet-guess-title">How long does sunlight take?</h3>
+          <div class="guess-options planet-guesses" id="planet-guesses" role="group" aria-label="Guess the sunlight travel time"></div>
+          <button class="button button-light" id="reveal-planet-light" type="button">Reveal and race ✦</button>
+          <div class="light-time-callout" id="light-time-callout" hidden>Sunlight reaches <strong id="light-planet-name">Earth</strong> in <strong id="light-travel-time">8 minutes 19 seconds</strong>.<span class="guess-feedback" id="planet-guess-feedback" role="status"></span></div>
+        </section>
         <section class="card race-visual" aria-labelledby="race-visual-title">
           <div class="card-heading"><div><p class="eyebrow">SUN TO PLANET</p><h3 id="race-visual-title">Watch light race</h3></div><span class="race-arrow" aria-hidden="true">☀ → ✦</span></div>
           <div class="race-track" id="race-track"><div class="track-endpoints"><span>☀ Sun</span><span id="track-finish">Earth</span></div><div class="race-progress" id="race-progress"></div></div>
@@ -81,7 +88,11 @@
           <div class="race-clock">Simulated time: <output id="sim-time">0 seconds</output></div>
           <div class="button-row"><button class="button button-secondary" id="start-race" type="button" hidden>Race again ↺</button><button class="button button-secondary" id="skip-race" type="button" hidden>Skip animation</button><span id="race-status" class="race-status" role="status" aria-live="polite">Ready at the Sun.</span></div>
         </section>
-        <section class="card planet-results" aria-labelledby="planet-results-title"><p class="eyebrow">YOUR GUESS</p><h3 id="planet-results-title">How long does sunlight take?</h3><div class="guess-options planet-guesses" id="planet-guesses" role="group" aria-label="Guess the sunlight travel time"></div><button class="button button-light" id="reveal-planet-light" type="button">Reveal and race ✦</button><div class="light-time-callout" id="light-time-callout" hidden>Sunlight reaches <strong id="light-planet-name">Earth</strong> in <strong id="light-travel-time">8 minutes 19 seconds</strong>.<span class="guess-feedback" id="planet-guess-feedback" role="status"></span></div><div id="planet-other-results" hidden><h4 class="results-heading">Other racers</h4><div id="travel-results"></div></div></section>
+        <section class="card planet-results" id="planet-other-results" aria-labelledby="planet-results-title" hidden>
+          <p class="eyebrow">TRAVEL TIMES</p>
+          <h3 id="planet-results-title">Other racers</h3>
+          <div id="travel-results"></div>
+        </section>
       </div>
       <p class="science-caveat"><strong>Imaginary race:</strong> Everyone keeps a constant speed on a straight path. People, cheetahs, and jets cannot travel through space this way. Real spacecraft follow different paths and speeds.</p>
       <div class="step-actions"><button class="button button-secondary" data-go="1" type="button">← Back</button><span class="step-progress">3 of 3</span><button class="button button-primary" id="start-over" type="button">Start Over ↺</button></div>

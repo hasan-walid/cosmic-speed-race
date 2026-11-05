@@ -182,9 +182,8 @@ tr:last-child td{border-bottom:0}
 .planet-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 23px;margin-bottom:16px;background:#1c3157}
 .planet-summary h3{font-size:35px;margin:2px 0 0}
 .planet-summary strong{display:block;font-size:clamp(19px,2.5vw,29px);color:var(--yellow)}
-.race-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(310px,.85fr);gap:16px}
-.race-visual,.planet-results{padding:22px}
-.race-visual .small-note{margin:7px 0 15px}
+.race-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.planet-guess,.race-visual,.planet-results{padding:22px}
 .race-arrow{font-size:23px}
 .race-track{padding:14px 16px;border:1px solid #455f89;border-radius:13px;background:linear-gradient(90deg,#0c1b3b,#1b3157)}
 .track-endpoints{display:grid;grid-template-columns:minmax(125px,170px) minmax(60px,1fr) minmax(155px,180px);gap:10px;color:var(--mint);font-size:13px;font-weight:900;margin-bottom:14px}
@@ -204,10 +203,10 @@ tr:last-child td{border-bottom:0}
 .race-clock{margin-top:13px;font-size:17px;font-weight:850}
 .race-clock output{color:var(--yellow);font-size:22px;font-variant-numeric:tabular-nums}
 .race-status{font-size:13px;font-weight:750;color:var(--muted)}
-.planet-results h3{font-size:25px;margin:5px 0 15px}
-.planet-guesses{grid-template-columns:1fr;gap:8px}
-.planet-guesses .guess-option{min-height:45px;font-size:15px;text-align:left;padding:8px 12px}
-.results-heading{font-size:16px;color:var(--muted);margin:24px 0 0}
+.planet-guess h3,.planet-results h3{font-size:25px;margin:5px 0 15px}
+.planet-guesses{max-width:none;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.planet-guesses .guess-option{min-height:54px;font-size:16px;padding:8px 12px}
+.planet-results #travel-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
 .travel-row{display:grid;grid-template-columns:minmax(105px,1fr) minmax(110px,1.2fr);gap:4px 9px;align-items:baseline;padding:11px 0;border-bottom:1px solid #3f557c}
 .travel-row:last-child{border-bottom:0}
 .travel-row strong{font-size:14px}
@@ -215,7 +214,7 @@ tr:last-child td{border-bottom:0}
 .travel-row small{grid-column:1/-1;color:var(--muted);font-size:11px}
 .light-time-callout{margin:16px 0 8px;padding:12px;border:1px solid #77cabc;border-radius:10px;background:#1a4a55;color:#fff;font-size:17px}
 .light-time-callout strong{color:#fff2a9}
-.planet-results>.button{margin-top:15px}
+.planet-guess>.button{margin-top:15px}
 .science-caveat{margin:16px 0 0;padding:14px 17px;border-left:4px solid var(--mint);border-radius:0 10px 10px 0;background:#142744;color:#d7e4f1;font-size:13px}
 .science-caveat strong{color:#fff}
 .teacher-notes{margin:8px 0 30px;border:1px solid var(--line);border-radius:13px;background:#111f3c}
@@ -236,7 +235,7 @@ body.is-presenting .racer-speed{font-size:36px}
 body.is-presenting .racer-ratio,body.is-presenting .one-second-name,body.is-presenting .one-second-value{font-size:19px}
 body.is-presenting .light-locked h3{font-size:clamp(38px,4vw,60px)}
 body.is-presenting .light-speed-number{font-size:clamp(60px,6vw,100px)}
-body.is-presenting .one-second .card-heading h3,body.is-presenting .planet-results h3{font-size:36px}
+body.is-presenting .one-second .card-heading h3,body.is-presenting .planet-guess h3,body.is-presenting .planet-results h3{font-size:36px}
 body.is-presenting .guess-option{font-size:20px;min-height:75px}
 body.is-presenting .race-progress-name,body.is-presenting .race-progress-value{font-size:16px}
 body.is-presenting .race-clock{font-size:23px}
@@ -245,7 +244,6 @@ body.is-presenting .light-time-callout{font-size:22px}
 @media(max-width:950px){
   .racer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .planet-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .race-layout{grid-template-columns:1fr}
 }
 @media(max-width:650px){
   .container,.topbar-inner{width:calc(100% - 28px)}
@@ -274,6 +272,7 @@ body.is-presenting .light-time-callout{font-size:22px}
   .light-stage,.mini-race{padding:19px}
   .mini-race{padding:0}
   .guess-options:not(.planet-guesses){grid-template-columns:1fr}
+  .planet-guesses,.planet-results #travel-results{grid-template-columns:1fr}
   .guess-option{min-height:51px;font-size:15px}
   .planet-summary{align-items:flex-start;flex-direction:column}
   .race-progress-row{grid-template-columns:minmax(0,1fr) auto;gap:3px 8px}
@@ -289,7 +288,7 @@ body.is-presenting .light-time-callout{font-size:22px}
   body.is-presenting .racer-card h3{font-size:18px}
   body.is-presenting .one-second-name,body.is-presenting .one-second-value{font-size:15px}
   body.is-presenting .light-speed-number{font-size:40px}
-  body.is-presenting .one-second .card-heading h3,body.is-presenting .planet-results h3{font-size:25px}
+  body.is-presenting .one-second .card-heading h3,body.is-presenting .planet-guess h3,body.is-presenting .planet-results h3{font-size:25px}
 }
 @media(max-width:420px){
   .racer-grid{grid-template-columns:1fr}

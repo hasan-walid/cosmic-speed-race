@@ -36,6 +36,8 @@ const state = {
   presentationFallback:false,
   raceFrame:null,
   raceRunning:false,
+  raceRunId:0,
+  raceElapsedSeconds:0,
   raceRows:{}
 };
 const $ = id => document.getElementById(id);
@@ -347,7 +349,7 @@ function renderPlanetRace(){
     results.append(row);
   });
   renderRaceRows();
-  updateRaceProgress(0);
+  updateRaceProgress(state.raceElapsedSeconds);
 }
 function renderRaceRows(){
   const rows=$("race-progress");
@@ -367,24 +369,27 @@ function renderRaceRows(){
     state.raceRows[racer.id]={marker,number};
   });
 }
-function updateRaceProgress(elapsedSeconds){
+function updateRaceProgress(elapsedSeconds,updateNumbers=true){
   if(state.speedMps===null)return;
   const distanceM=getPlanetDistanceMetres(PLANETS[state.planetIndex]);
   const lightSeconds=calculateTravelTime(distanceM,LIGHT_MPS);
   const elapsed=Math.max(0,Math.min(lightSeconds,elapsedSeconds));
-  $("sim-time").textContent=formatTravelDuration(elapsed);
+  state.raceElapsedSeconds=elapsed;
+  if(updateNumbers)$("sim-time").textContent=formatTravelDuration(elapsed);
   getRacers().forEach(racer=>{
     const progress=getRaceProgress(distanceM,racer.speedMps,elapsed);
     const row=state.raceRows[racer.id];
     if(!row)return;
     row.marker.style.left=progress.fraction*100+"%";
-    row.number.textContent=formatRaceDistance(progress.distanceM)+" · "+formatProgressPercent(progress.fraction);
+    if(updateNumbers)row.number.textContent=formatRaceDistance(progress.distanceM)+" · "+formatProgressPercent(progress.fraction);
   });
 }
 function resetRaceAnimation(){
   if(state.raceFrame!==null)cancelAnimationFrame(state.raceFrame);
   state.raceFrame=null;
   state.raceRunning=false;
+  state.raceRunId++;
+  state.raceElapsedSeconds=0;
   $("skip-race").hidden=true;
   $("start-race").hidden=!state.planetLightRevealed;
   updateRaceProgress(0);
@@ -394,6 +399,7 @@ function finishRace(){
   if(state.raceFrame!==null)cancelAnimationFrame(state.raceFrame);
   state.raceFrame=null;
   state.raceRunning=false;
+  state.raceRunId++;
   const distanceM=getPlanetDistanceMetres(PLANETS[state.planetIndex]);
   updateRaceProgress(calculateTravelTime(distanceM,LIGHT_MPS));
   $("skip-race").hidden=true;
@@ -402,8 +408,10 @@ function finishRace(){
 }
 function startRace(){
   if(state.speedMps===null&&!calculateFromForm())return;
-  revealPlanetLight();
+  const firstReveal=!state.planetLightRevealed;
+  if(firstReveal)revealPlanetLight();
   resetRaceAnimation();
+  if(firstReveal&&state.step===2)$("race-visual").scrollIntoView({behavior:"auto",block:"start"});
   if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){
     finishRace();
     return;
@@ -413,12 +421,16 @@ function startRace(){
   $("start-race").hidden=true;
   $("race-status").textContent="Racing from the Sun…";
   const lightSeconds=calculateTravelTime(getPlanetDistanceMetres(PLANETS[state.planetIndex]),LIGHT_MPS);
+  const runId=state.raceRunId;
   let startTime=null;
+  let lastReadoutTime=-Infinity;
   const tick=now=>{
-    if(!state.raceRunning)return;
+    if(!state.raceRunning||runId!==state.raceRunId)return;
     if(startTime===null)startTime=now;
     const fraction=Math.min(1,(now-startTime)/RACE_ANIMATION_MS);
-    updateRaceProgress(lightSeconds*fraction);
+    const refreshReadout=now-lastReadoutTime>=100||fraction===1;
+    updateRaceProgress(lightSeconds*fraction,refreshReadout);
+    if(refreshReadout)lastReadoutTime=now;
     if(fraction<1)state.raceFrame=requestAnimationFrame(tick);
     else finishRace();
   };
@@ -430,6 +442,7 @@ function showStep(index){
   if(index>0&&state.speedMps===null&&!calculateFromForm()){
     index=0;
   }
+  const previousStep=state.step;
   state.step=index;
   if(index!==2&&state.raceRunning)resetRaceAnimation();
   ["step-run","step-compare","step-planets"].forEach((id,i)=>$(id).hidden=i!==index);
@@ -439,8 +452,8 @@ function showStep(index){
     if(active)button.setAttribute("aria-current","step");
     else button.removeAttribute("aria-current");
   });
-  if(index===1)renderComparisons();
-  if(index===2)renderPlanetRace();
+  if(index===1&&previousStep!==1)renderComparisons();
+  if(index===2&&previousStep!==2)renderPlanetRace();
   window.scrollTo({top:$("main").offsetTop,behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
 }
 function clearRunner(){
@@ -516,4 +529,4 @@ function init(){
   document.addEventListener("fullscreenchange",updatePresentButton);
 }
 if(typeof document!=="undefined")document.addEventListener("DOMContentLoaded",init);
-if(typeof module!=="undefined")module.exports={LIGHT_MPS,AU_METRES,RACERS,PLANETS,state,calculateSpeed,calculateTravelTime,getPlanetDistanceMetres,getRaceProgress,getLogBarPercent,formatSpeed,formatTravelDuration,formatFactor,resetRunner,resetAll,startRace,selectPlanet,calculateFromForm,renderComparisons,renderPlanetRace,togglePresentation,init};
+if(typeof module!=="undefined")module.exports={LIGHT_MPS,AU_METRES,RACERS,PLANETS,state,calculateSpeed,calculateTravelTime,getPlanetDistanceMetres,getRaceProgress,getLogBarPercent,formatSpeed,formatTravelDuration,formatFactor,resetRunner,resetAll,startRace,selectPlanet,calculateFromForm,renderComparisons,renderPlanetRace,showStep,togglePresentation,init};

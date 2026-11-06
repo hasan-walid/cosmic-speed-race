@@ -192,7 +192,7 @@ tr:last-child td{border-bottom:0}
 .race-progress{display:grid;gap:10px}
 .race-progress-row{display:grid;grid-template-columns:minmax(125px,170px) minmax(60px,1fr) minmax(155px,180px);align-items:center;gap:10px}
 .race-progress-name{font-size:13px;font-weight:800;line-height:1.2}
-.race-progress-value{text-align:right;color:#fff;font-size:12px;font-variant-numeric:tabular-nums}
+.race-progress-value{text-align:right;color:#fff;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .race-lane{position:relative;height:18px;border-radius:10px;background:linear-gradient(#4e6790,#4e6790) center/100% 2px no-repeat}
 .race-dot{position:absolute;top:50%;left:0;width:11px;height:11px;border-radius:50%;background:var(--mint);transform:translate(-50%,-50%);box-shadow:0 0 0 2px #101e3d}
 .race-dot.mbappe{background:var(--pink)}
@@ -275,10 +275,11 @@ body.is-presenting .light-time-callout{font-size:22px}
   .planet-guesses,.planet-results #travel-results{grid-template-columns:1fr}
   .guess-option{min-height:51px;font-size:15px}
   .planet-summary{align-items:flex-start;flex-direction:column}
-  .race-progress-row{grid-template-columns:minmax(0,1fr) auto;gap:3px 8px}
+  .race-progress-row{grid-template-columns:minmax(0,1fr);gap:3px}
   .track-endpoints{display:flex;justify-content:space-between}
-  .race-lane{grid-column:1/-1;grid-row:2}
-  .race-progress-value{grid-column:2;grid-row:1}
+  .race-progress-name{grid-column:1;grid-row:1}
+  .race-lane{grid-column:1;grid-row:2}
+  .race-progress-value{grid-column:1;grid-row:3;text-align:left}
   .step-actions{flex-wrap:wrap}
   .step-actions .button{font-size:13px}
   .footer{flex-direction:column}
